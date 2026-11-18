@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proxys Browser — лучший браузер для YouTube</title>
+<meta name="description" content="Ролики без рекламы, YouTube без отдельного VPN, видео с сайтов в один клик и приватность, о которой не нужно думать.">
+<meta name="theme-color" content="#0b0b0b">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Proxys Browser — лучший браузер для YouTube">
+<meta property="og:description" content="Ролики без рекламы, YouTube без отдельного VPN, видео с сайтов в один клик.">
+<meta property="og:image" content="https://evilork.github.io/browser-preview/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="mark-orange.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geologica:wght@500;600;700;800&family=JetBrains+Mono:wght@500&family=Onest:wght@400;500;600&display=swap" rel="stylesheet">
+<script>document.documentElement.classList.add("js");</script>
+<style>
+:root{
+  --bg:#0b0b0b; --card:#111111; --raise:#191919; --line:#222222; --line-2:#2f2f2f;
+  --text:#f6f4f0; --mute:#a19e98; --dim:#66635e;
+  --orange:#ff9000; --orange-2:#ffa733; --ink:#0b0b0b; --ad:#f2c230;
+  --display:"Geologica","Onest",system-ui,sans-serif;
+  --body:"Onest",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --gutter:clamp(16px,4vw,40px);
+  --r:22px;
+  --e-out:cubic-bezier(.16,1,.3,1);
+  --e-io:cubic-bezier(.65,0,.35,1);
+  --warm:
+    radial-gradient(120% 90% at 18% 12%,#6a3300 0%,transparent 55%),
+    radial-gradient(90% 80% at 88% 85%,#2e1500 0%,transparent 60%),
+    linear-gradient(160deg,#1c1007,#080605);
+  --grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='.55'/></svg>");
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:80px;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--text);font:400 17px/1.6 var(--body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+::selection{background:var(--orange);color:var(--ink)}
+a{color:inherit}
+button{font:inherit;color:inherit}
+img,svg{display:block}
+:focus-visible{outline:2px solid var(--orange);outline-offset:3px;border-radius:8px}
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--gutter)}
+.num{font-variant-numeric:tabular-nums}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Chapter bar */
+.chapters{position:fixed;inset:0 0 auto 0;z-index:60;display:flex;align-items:flex-start;gap:3px;height:12px}
+.chapters a{position:relative;display:block;flex:1 1 0;height:4px;background:rgba(255,255,255,.13);transition:height .2s var(--e-out)}
+.chapters a:hover,.chapters a:focus-visible{height:7px;outline:none}
+.chapters i{position:absolute;inset:0 auto 0 0;width:calc(var(--f,0) * 100%);background:var(--orange)}
+.chapters a::after{content:attr(data-time) "   " attr(data-label);white-space:pre;position:absolute;top:16px;left:50%;padding:7px 10px;border-radius:8px;background:#1c1c1c;border:1px solid var(--line-2);font:500 12px/1 var(--mono);color:var(--text);opacity:0;pointer-events:none;transform:translate(-50%,-4px);transition:opacity .15s,transform .2s var(--e-out)}
+.chapters a:first-child::after{left:8px;transform:translate(0,-4px)}
+.chapters a:last-child::after{left:auto;right:8px;transform:translate(0,-4px)}
+.chapters a:hover::after,.chapters a:focus-visible::after{opacity:1;transform:translate(-50%,0)}
+.chapters a:first-child:hover::after,.chapters a:last-child:hover::after,.chapters a:first-child:focus-visible::after,.chapters a:last-child:focus-visible::after{transform:none}
+
+/* Navigation */
+.nav{position:sticky;top:0;z-index:50;background:rgba(11,11,11,.74);-webkit-backdrop-filter:saturate(140%) blur(14px);backdrop-filter:saturate(140%) blur(14px);border-bottom:1px solid transparent;transition:border-color .3s}
+.nav.scrolled{border-bottom-color:var(--line)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px;padding-top:4px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font:700 17px/1 var(--display);letter-spacing:-.01em;white-space:nowrap}
+.brand img{width:28px;height:28px}
+.nav ul{display:flex;gap:30px;list-style:none;margin:0;padding:0}
+.nav ul a{position:relative;text-decoration:none;color:var(--mute);font-size:15px;transition:color .2s}
+.nav ul a::after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:1px;background:var(--orange);transform:scaleX(0);transform-origin:left;transition:transform .35s var(--e-out)}
+.nav ul a:hover{color:var(--text)}
+.nav ul a:hover::after,.nav ul a.on::after{transform:scaleX(1)}
+.nav ul a.on{color:var(--text)}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:50px;padding:0 24px;border-radius:999px;border:0;font:600 16px/1 var(--body);text-decoration:none;white-space:nowrap;cursor:pointer;transition:background .2s,border-color .2s,transform .2s var(--e-out),color .2s}
+.btn-primary{background:var(--orange);color:var(--ink)}
+.btn-primary:hover{background:var(--orange-2)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn-ghost{background:transparent;color:var(--text);border:1px solid var(--line-2)}
+.btn-ghost:hover{border-color:var(--mute)}
+.btn-sm{height:38px;padding:0 16px;font-size:14px}
+.btn .arr{display:inline-block;transition:transform .35s var(--e-out)}
+.btn:hover .arr{transform:translateY(2px)}
+.btn:disabled{opacity:.45;cursor:default;transform:none}
+
+/* Type */
+.tc{display:inline-flex;align-items:center;gap:12px;margin:0;font:500 12.5px/1 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.tc b{font-weight:500;color:var(--orange)}
+h2{margin:20px 0 0;font:800 clamp(40px,5.2vw,68px)/1.02 var(--display);letter-spacing:-.035em;text-wrap:balance}
+h2 em{font-style:normal;color:var(--orange)}
+h3{margin:0 0 8px;font:700 18px/1.3 var(--display);letter-spacing:-.01em}
+.lead{margin:0;max-width:31em;font-size:clamp(17px,1.4vw,19px);line-height:1.6;color:var(--mute)}
+.foot{margin:28px 0 0;max-width:74em;font:500 12.5px/1.7 var(--mono);color:var(--dim)}
+.foot b{font-weight:500;color:var(--mute)}
+
+/* Sections */
+section.ch{padding:clamp(96px,13vh,150px) 0;border-top:1px solid var(--line)}
+.ch-head{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:clamp(24px,5vw,80px);align-items:end;margin-bottom:clamp(44px,6vh,68px)}
+.split{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:clamp(32px,5vw,72px);align-items:center}
+.panel{position:relative;border:1px solid var(--line);border-radius:var(--r);background:var(--card)}
+.panel-head{display:flex;justify-content:space-between;align-items:center;gap:16px;min-height:62px;padding:12px 14px 12px 20px;border-bottom:1px solid var(--line)}
+.panel-head > span{display:flex;align-items:center;gap:10px;font:600 15px/1 var(--display)}
+.panel-head svg{width:18px;height:18px;fill:none;stroke:var(--orange);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.caption{margin:14px 4px 0;font:500 12.5px/1.6 var(--mono);color:var(--dim)}
+.points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin-top:clamp(40px,5vh,60px);border-top:1px solid var(--line)}
+.points > div{padding:26px 32px 0 0}
+.points p,.list p{margin:0;font-size:16px;color:var(--mute)}
+.list{display:grid;gap:0}
+.list > div{padding:20px 0;border-top:1px solid var(--line)}
+.list > div:last-child{border-bottom:1px solid var(--line)}
+.list h3 i{font-style:normal;color:var(--orange)}
+
+/* Words that rise from a mask */
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .03em .12em;margin:0 -.03em -.12em}
+.w > span{display:inline-block;transform:translateY(112%);transition:transform 1.05s var(--e-out);transition-delay:calc(var(--i,0) * 45ms)}
+.in .w > span,.in.w > span{transform:none}
+.js .reveal{opacity:0;transform:translateY(26px);transition:opacity 1s var(--e-out),transform 1s var(--e-out);transition-delay:var(--rd,0s)}
+.js .reveal.in{opacity:1;transform:none}
+
+/* Hero */
+.hero{position:relative;padding:clamp(56px,10vh,120px) 0 clamp(80px,12vh,140px);overflow:hidden}
+.hero::before{content:"";position:absolute;top:-30%;right:-15%;width:min(70vw,900px);aspect-ratio:1;background:radial-gradient(closest-side,rgba(255,144,0,.15),transparent 72%);pointer-events:none}
+.hero h1{margin:0;font-weight:inherit}
+.h1-top{display:block;margin:26px 0 18px;font:600 clamp(26px,3.6vw,46px)/1.12 var(--display);letter-spacing:-.02em}
+.lockup{position:relative;display:inline-flex;align-items:center;font:800 clamp(62px,19.5vw,212px)/.92 var(--display);letter-spacing:-.05em;cursor:default;-webkit-tap-highlight-color:transparent}
+.lockup .you{display:inline-block;overflow:hidden;padding-bottom:.04em;margin-bottom:-.04em;transition:opacity 1s var(--e-out),filter 1s var(--e-out)}
+.lockup .you > span,.lockup .tube > span{display:inline-block}
+.lockup .tube{margin-left:.05em;padding:.015em .1em .065em;border-radius:.13em;background:var(--orange);color:var(--ink);letter-spacing:-.045em}
+.js .lockup .you > span{transform:translateY(105%);transition:transform 1.1s var(--e-out) .15s}
+.js .lockup .tube{clip-path:inset(0 100% 0 0 round .13em);transition:clip-path 1s var(--e-io) .35s}
+.js .lockup .tube > span{opacity:0;transform:translateY(25%);transition:opacity .7s var(--e-out) .9s,transform .9s var(--e-out) .9s}
+.js .lockup.ready .you > span,.js .lockup.ready .tube > span{opacity:1;transform:none}
+.js .lockup.ready .tube{clip-path:inset(0 0 0 0 round .13em)}
+.lockup.dim .you{opacity:.1;filter:blur(.02em)}
+.note{position:absolute;top:100%;right:0;margin-top:16px;display:flex;align-items:center;gap:12px;white-space:nowrap;font:500 13px/1 var(--mono);letter-spacing:.02em;color:var(--orange);opacity:0;transform:translateY(-6px);transition:opacity .6s var(--e-out),transform .6s var(--e-out)}
+.note::before{content:"";width:32px;height:1px;background:currentColor;transform:scaleX(0);transform-origin:right;transition:transform .6s var(--e-out) .1s}
+.lockup.dim .note,.lockup.still .note{opacity:1;transform:none}
+.lockup.dim .note::before,.lockup.still .note::before{transform:none}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.12fr);gap:clamp(36px,5vw,80px);align-items:center;margin-top:clamp(64px,9vh,96px)}
+.hero .lead{max-width:30em;margin-bottom:30px;font-size:clamp(18px,1.6vw,21px);line-height:1.55}
+.hero .lead strong{font-weight:500;color:var(--text)}
+.hero .lead a{color:var(--dim);text-decoration:none}
+.cta{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.platforms{margin:22px 0 0;font:500 12.5px/1.5 var(--mono);letter-spacing:.03em;color:var(--dim)}
+.js .fade{opacity:0;transform:translateY(16px);transition:opacity 1s var(--e-out),transform 1s var(--e-out);transition-delay:var(--rd,0s)}
+.js .ready-all .fade{opacity:1;transform:none}
+
+/* Players */
+.player-wrap{perspective:1400px}
+.player{position:relative;aspect-ratio:16/9;border-radius:20px;overflow:hidden;background:var(--warm);box-shadow:0 50px 120px -50px rgba(255,144,0,.45),inset 0 0 0 1px rgba(255,255,255,.07);cursor:pointer;transform:rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg));transition:transform .7s var(--e-out);-webkit-tap-highlight-color:transparent}
+.player::before,.mini::before{content:"";position:absolute;inset:0;z-index:1;background-image:var(--grain);opacity:.22;mix-blend-mode:overlay;pointer-events:none}
+.player::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 42%);pointer-events:none}
+.glow{position:absolute;width:55%;aspect-ratio:1;left:30%;top:-10%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,170,60,.35),transparent 70%);animation:drift 14s ease-in-out infinite alternate}
+.glow.two{width:40%;left:5%;top:45%;background:radial-gradient(closest-side,rgba(255,120,20,.22),transparent 70%);animation-duration:19s;animation-direction:alternate-reverse}
+@keyframes drift{to{transform:translate(-30%,25%) scale(1.15)}}
+.p-chip{position:absolute;top:16px;left:16px;z-index:2;display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(0,0,0,.45);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:500 12px/1 var(--mono);color:var(--text)}
+.p-chip i{width:7px;height:7px;border-radius:50%;background:var(--orange)}
+.p-play{position:absolute;inset:0;z-index:2;margin:auto;width:76px;height:76px;display:grid;place-items:center;border-radius:50%;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);transition:opacity .35s,transform .45s var(--e-out)}
+.p-play svg{width:26px;height:26px;fill:var(--text)}
+.p-play .i-play{margin-left:4px}
+.p-play .i-pause{display:none}
+.player.playing .p-play{opacity:0;transform:scale(.88)}
+.player.playing:hover .p-play,.player.playing:focus-visible .p-play{opacity:1;transform:none}
+.player.playing .p-play .i-play{display:none}
+.player.playing .p-play .i-pause{display:block}
+.p-bottom{position:absolute;left:16px;right:16px;bottom:14px;z-index:2}
+.p-track{position:relative;height:4px;border-radius:2px;background:rgba(255,255,255,.22)}
+.p-track .done{position:absolute;inset:0 auto 0 0;width:var(--at,34%);border-radius:2px;background:var(--orange)}
+.p-track .knob{position:absolute;top:50%;left:var(--at,34%);width:13px;height:13px;border-radius:50%;background:var(--orange);transform:translate(-50%,-50%)}
+.playing .p-track .done{transition:width 1s linear}
+.playing .p-track .knob{transition:left 1s linear}
+.p-track .ad{position:absolute;top:0;width:4px;height:100%;background:var(--ad);animation:adgone .7s var(--e-out) forwards;animation-delay:var(--d)}
+@keyframes adgone{to{opacity:0;transform:scaleY(0)}}
+.p-row{display:flex;justify-content:space-between;align-items:center;margin-top:11px;font:500 12px/1 var(--mono);color:rgba(255,255,255,.82)}
+.p-skip{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.14);font:500 12.5px/1 var(--body);color:rgba(255,255,255,.55)}
+.p-skip svg{width:12px;height:12px;fill:currentColor}
+.p-hint{margin:14px 2px 0;font:500 12px/1.4 var(--mono);color:var(--dim);text-align:right}
+
+/* Without ads */
+.setting{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:18px 22px;border-bottom:1px solid var(--line)}
+.setting b{display:block;font:600 16px/1.3 var(--display)}
+.setting small{display:block;margin-top:4px;font:500 12px/1.3 var(--mono);color:var(--dim)}
+.switch{position:relative;flex:none;width:54px;height:32px;padding:0;border-radius:999px;border:0;background:#3a3a3a;cursor:pointer;transition:background .4s var(--e-out)}
+.switch::after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.45);transition:transform .5s var(--e-out)}
+.switch[aria-checked="true"]{background:var(--orange)}
+.switch[aria-checked="true"]::after{transform:translateX(22px)}
+.compare-body{display:grid;gap:26px;padding:28px 22px 24px}
+.row{display:grid;grid-template-columns:160px minmax(0,1fr) 120px;gap:22px;align-items:center}
+.row .lbl{font:500 13px/1.3 var(--mono);color:var(--mute)}
+.row.ours .lbl{color:var(--text)}
+.val{display:grid;justify-items:end;font:500 13px/1.3 var(--mono);color:var(--mute)}
+.val > span{grid-area:1 / 1;transition:opacity .35s,transform .45s var(--e-out)}
+.row.ours .val{color:var(--text)}
+.bar{display:flex;gap:3px;height:10px}
+.bar span{min-width:0;border-radius:3px;background:rgba(255,255,255,.16);transition:flex-grow 1s var(--e-io),opacity .6s,margin 1s var(--e-io)}
+.bar .a{background:var(--ad)}
+.row.ours .bar span:not(.a){background:var(--orange)}
+.blocked .row.ours .a{flex-grow:0 !important;opacity:0;margin-right:-3px}
+.blocked .row.ours .a:nth-child(3){transition-delay:.12s}
+.blocked .row.ours .a:nth-child(5){transition-delay:.24s}
+.compare .v-off{opacity:1}
+.compare .v-on{opacity:0;transform:translateY(6px)}
+.compare.blocked .v-off{opacity:0;transform:translateY(-6px)}
+.compare.blocked .v-on{opacity:1;transform:none}
+.legend{display:flex;gap:22px;font:500 12px/1 var(--mono);color:var(--dim)}
+.legend span{display:inline-flex;align-items:center;gap:8px}
+.legend i{width:14px;height:6px;border-radius:2px;background:var(--ad)}
+.legend i.v{background:var(--orange)}
+
+/* Without VPN */
+.routes{padding:16px}
+.seg-for{margin:2px 6px 10px;font:500 12px/1.4 var(--mono);color:var(--dim)}
+.seg-for b{font-weight:500;color:var(--text)}
+.seg{position:relative;display:grid;grid-template-columns:repeat(3,1fr);padding:4px;margin-bottom:10px;border-radius:12px;background:var(--raise)}
+.seg .thumb{position:absolute;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 3);border-radius:9px;background:var(--text);transform:translateX(calc(var(--idx,0) * 100%));transition:transform .5s var(--e-out)}
+.seg button{position:relative;z-index:1;padding:11px 0;border:0;border-radius:9px;background:transparent;font:500 14px/1 var(--body);color:var(--mute);cursor:pointer;transition:color .3s}
+.seg button[aria-checked="true"]{color:var(--bg)}
+.route{position:relative;display:flex;width:100%;justify-content:space-between;align-items:center;gap:14px;padding:15px 12px 15px 16px;border:0;border-radius:12px;background:transparent;text-align:left;cursor:pointer;transition:background .25s}
+.route + .route{margin-top:2px}
+.route:hover{background:rgba(255,255,255,.035)}
+.route[aria-pressed="true"]{background:rgba(255,144,0,.075)}
+.route::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:2px;background:var(--orange);transform:scaleY(0);transition:transform .35s var(--e-out)}
+.route[aria-pressed="true"]::before{transform:none}
+.dom{font:500 14.5px/1.2 var(--mono);color:var(--text)}
+.redact{display:inline-block;width:6.4em;height:.9em;vertical-align:-.1em;border-radius:3px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.24) 0 .55em,transparent .55em .64em)}
+.st{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;font:500 12px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase;color:var(--mute);transition:opacity .16s,transform .25s var(--e-out)}
+.st.flip{opacity:0;transform:translateX(6px)}
+.st i{width:8px;height:8px;border-radius:50%;background:var(--dim);transition:background .3s,box-shadow .3s}
+.st.tun{color:var(--text)}
+.st.tun i{background:var(--orange);box-shadow:0 0 0 4px rgba(255,144,0,.16)}
+.st em{font-style:normal;padding:3px 6px;border-radius:5px;background:rgba(255,255,255,.07);color:var(--mute);letter-spacing:.02em}
+.routes .meta{display:flex;justify-content:space-between;gap:12px;margin-top:10px;padding:14px 8px 4px;border-top:1px solid var(--line);font:500 12px/1.5 var(--mono);color:var(--dim)}
+.routes .meta b{font-weight:500;color:var(--mute)}
+
+/* Video download demo */
+.demo{overflow:hidden;box-shadow:0 70px 140px -70px rgba(0,0,0,.95)}
+.chrome{display:flex;align-items:center;gap:14px;height:48px;padding:0 14px;border-bottom:1px solid var(--line);background:#0e0e0e;border-radius:var(--r) var(--r) 0 0}
+.dots{display:flex;gap:7px}
+.dots i{width:11px;height:11px;border-radius:50%;background:#2a2a2a}
+.addr{flex:1;display:flex;align-items:center;gap:10px;min-width:0;height:30px;padding:0 6px 0 12px;border-radius:9px;background:#191919;font:500 13px/1 var(--mono);color:var(--mute);white-space:nowrap;overflow:hidden}
+.addr svg{flex:none;width:12px;height:12px;fill:none;stroke:var(--dim);stroke-width:2}
+.addr img{flex:none;width:20px;height:20px;margin-left:auto}
+.page{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:22px;padding:22px}
+.vid{position:relative;aspect-ratio:16/9;border-radius:14px;overflow:hidden;background:#140b05;cursor:context-menu;-webkit-tap-highlight-color:transparent}
+.vid svg.scene{position:absolute;inset:0;width:100%;height:100%}
+.vid .sun{animation:sun 9s ease-in-out infinite alternate}
+@keyframes sun{to{transform:translateY(-10px)}}
+.vid .p-bottom{left:14px;right:14px;bottom:12px}
+.vid::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.55),transparent 35%);pointer-events:none}
+.vid-meta{margin-top:16px}
+.vid-meta b{display:block;font:600 18px/1.3 var(--display)}
+.vid-meta span{font:500 12.5px/1.6 var(--mono);color:var(--dim)}
+.side{display:grid;align-content:start;gap:14px}
+.side div{display:grid;grid-template-columns:96px 1fr;gap:12px;align-items:start}
+.side i{display:block;aspect-ratio:16/9;border-radius:8px;background:linear-gradient(135deg,#2a1708,#120a05)}
+.side u{display:block;height:8px;margin:5px 0 8px;border-radius:4px;background:rgba(255,255,255,.1);text-decoration:none}
+.side u + u{width:60%;background:rgba(255,255,255,.06)}
+.menu{position:absolute;z-index:6;width:250px;padding:6px;border-radius:12px;background:rgba(30,30,30,.97);border:1px solid var(--line-2);box-shadow:0 24px 60px -12px rgba(0,0,0,.85);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);transform-origin:0 0;opacity:0;transform:scale(.96);visibility:hidden;transition:opacity .16s,transform .24s var(--e-out),visibility 0s .24s}
+.menu.open{opacity:1;transform:none;visibility:visible;transition:opacity .16s,transform .24s var(--e-out),visibility 0s}
+.menu button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 10px;border:0;border-radius:8px;background:transparent;text-align:left;font:500 14px/1.2 var(--body);color:var(--mute);cursor:pointer}
+.menu button:hover,.menu button:focus-visible,.menu button.hot{background:rgba(255,255,255,.08);color:var(--text);outline:none}
+.menu .dl-item{color:var(--text)}
+.menu .dl-item img{width:16px;height:16px}
+.menu hr{height:1px;margin:5px 6px;border:0;background:var(--line-2)}
+.toast{position:absolute;left:50%;bottom:18px;z-index:7;display:flex;align-items:center;gap:14px;width:min(340px,calc(100% - 32px));padding:12px 16px 12px 12px;border-radius:14px;background:rgba(22,22,22,.95);border:1px solid var(--line-2);box-shadow:0 20px 50px -14px rgba(0,0,0,.8);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);opacity:0;transform:translate(-50%,18px);transition:opacity .3s,transform .5s var(--e-out);pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.ring{position:relative;flex:none;width:34px;height:34px}
+.ring svg{width:34px;height:34px;transform:rotate(-90deg)}
+.ring circle{fill:none;stroke-width:3}
+.ring .bg{stroke:rgba(255,255,255,.1)}
+.ring .fg{stroke:var(--orange);stroke-linecap:round}
+.ring .ok{position:absolute;inset:0;margin:auto;width:16px;height:16px;fill:none;stroke:var(--orange);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transform:none;stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset .45s var(--e-out) .1s}
+.toast.done .ring .ok{stroke-dashoffset:0}
+.toast b{display:block;font:600 14px/1.3 var(--body)}
+.toast small{display:block;font:500 12px/1.4 var(--mono);color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cursor{position:absolute;left:0;top:0;z-index:8;width:22px;height:22px;pointer-events:none;opacity:0;transition:opacity .35s;filter:drop-shadow(0 2px 4px rgba(0,0,0,.6))}
+.cursor.on{opacity:1}
+.ripple{position:absolute;z-index:8;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;border:2px solid var(--orange);pointer-events:none;animation:ripple .6s var(--e-out) forwards}
+@keyframes ripple{from{transform:scale(.3);opacity:1}to{transform:scale(1.4);opacity:0}}
+
+/* Picture in picture */
+.desk{position:relative;aspect-ratio:16/10;overflow:hidden;border:1px solid var(--line);border-radius:18px;background:#0f0f0f;touch-action:none}
+.desk .bar-top{position:relative;z-index:2;display:flex;align-items:center;gap:7px;height:36px;padding:0 14px;border-bottom:1px solid var(--line);background:#0f0f0f}
+.desk .bar-top i{width:10px;height:10px;border-radius:50%;background:#2a2a2a}
+.desk .bar-top span{margin-left:10px;font:500 12px/1 var(--mono);color:var(--dim)}
+.sheet{position:absolute;inset:36px 0 0 0;display:grid;grid-template-columns:44px repeat(8,112px);grid-auto-rows:34px}
+.sheet i{position:relative;border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.sheet i::after{content:"";position:absolute;left:10px;top:50%;width:var(--w,40%);max-width:76px;height:6px;border-radius:3px;background:rgba(255,255,255,.075);transform:translateY(-50%)}
+.sheet i.h{background:#141414}
+.sheet i.h::after{background:rgba(255,255,255,.15)}
+.sheet i.n::after{width:14px;background:rgba(255,255,255,.12)}
+.cell{position:absolute;left:0;top:0;z-index:1;width:112px;height:34px;border:2px solid var(--orange);border-radius:2px;transition:transform .6s var(--e-out)}
+.mini{position:absolute;left:0;top:0;z-index:3;width:40%;aspect-ratio:16/9;overflow:hidden;border-radius:12px;background:var(--warm);box-shadow:0 28px 60px -12px rgba(0,0,0,.85),inset 0 0 0 1px rgba(255,255,255,.1);cursor:grab;transition:translate .65s var(--e-out),scale .45s var(--e-out),opacity .3s;-webkit-tap-highlight-color:transparent}
+.mini.drag{cursor:grabbing;transition:scale .3s var(--e-out);scale:1.03}
+.mini.away{opacity:0;scale:.8;pointer-events:none}
+.mini .p-play{width:38px;height:38px}
+.mini .p-play svg{width:14px;height:14px}
+.mini .p-play .i-play{margin-left:2px}
+.mini .p-track{position:absolute;left:10px;right:10px;bottom:10px;z-index:2;height:3px}
+.mini .p-track .knob{width:9px;height:9px}
+.mini .p-track .done,.mini .p-track .knob{transition:width 1s linear,left 1s linear}
+.keys{display:inline-flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:30px;padding:0;border:0;background:none;font:500 15px/1 var(--mono);color:var(--dim);cursor:pointer}
+kbd{display:inline-grid;place-items:center;min-width:48px;height:48px;padding:0 13px;border-radius:11px;border:1px solid var(--line-2);border-bottom-width:3px;background:linear-gradient(#1f1f1f,#151515);font:500 15px/1 var(--mono);color:var(--text);transition:background .15s,color .15s,border-color .15s,transform .15s}
+kbd.on{background:var(--orange);border-color:var(--orange);color:var(--ink);transform:translateY(2px)}
+.keys:hover kbd{border-color:#3d3d3d}
+
+/* Private */
+.private{background:radial-gradient(70% 55% at 50% 0%,rgba(255,144,0,.11),transparent 72%),var(--bg)}
+.duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+.box{position:relative;min-height:330px;overflow:hidden}
+.hist{list-style:none;margin:0;padding:8px 0}
+.hist li{display:grid;grid-template-columns:56px minmax(0,1fr);gap:14px;align-items:baseline;padding:12px 20px}
+.hist time{font:500 12.5px/1 var(--mono);color:var(--dim)}
+.hist .t{font-size:15.5px;color:var(--text)}
+.hist .u{display:block;margin-top:4px;font:500 12px/1.3 var(--mono);color:var(--dim)}
+.hist .hide{filter:blur(6px);-webkit-user-select:none;user-select:none}
+.burning .hist li{animation:burn .75s cubic-bezier(.4,0,.6,1) forwards;animation-delay:calc(var(--i) * 90ms)}
+@keyframes burn{35%{color:var(--orange);text-shadow:0 0 14px rgba(255,144,0,.85)}100%{opacity:0;transform:translateY(-12px);filter:blur(8px)}}
+.burnt .hist li{visibility:hidden}
+.spark{position:absolute;z-index:3;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--orange-2);box-shadow:0 0 8px var(--orange);pointer-events:none}
+.state{position:absolute;inset:0;display:grid;place-content:center;justify-items:center;gap:6px;padding:20px;text-align:center;opacity:0;visibility:hidden;transition:opacity .5s var(--e-out),visibility 0s .5s}
+.state b{font:700 22px/1.2 var(--display);letter-spacing:-.01em}
+.state p{margin:0 0 14px;color:var(--mute)}
+.burnt .state.empty{opacity:1;visibility:visible;transition:opacity .5s var(--e-out) .1s,visibility 0s}
+.locked{display:grid;justify-items:center;padding:30px 20px 26px;transition:opacity .4s var(--e-out),transform .5s var(--e-out)}
+.locked p{margin:0 0 18px;font:500 12.5px/1 var(--mono);color:var(--dim)}
+.dots4{display:flex;gap:14px;margin-bottom:24px}
+.dots4 i{width:13px;height:13px;border-radius:50%;border:1.5px solid #444;transition:background .2s,border-color .2s,transform .35s var(--e-out)}
+.dots4 i.f{background:var(--orange);border-color:var(--orange);transform:scale(1.12)}
+.pad{display:grid;grid-template-columns:repeat(3,64px);gap:10px}
+.pad button{height:50px;border-radius:14px;border:1px solid var(--line);background:var(--raise);font:500 19px/1 var(--display);cursor:pointer;transition:background .15s,transform .15s var(--e-out),border-color .15s}
+.pad button:hover{border-color:var(--line-2)}
+.pad button:active{transform:scale(.95);background:#222}
+.pad .del{font:500 15px/1 var(--mono);color:var(--mute)}
+.pad .blank{visibility:hidden}
+.open .locked{opacity:0;transform:scale(.97);pointer-events:none}
+.vault{position:absolute;inset:62px 0 0 0;padding:14px 0;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .45s var(--e-out),transform .6s var(--e-out),visibility 0s .45s}
+.open .vault{opacity:1;visibility:visible;transform:none;transition:opacity .45s var(--e-out) .15s,transform .6s var(--e-out) .15s,visibility 0s}
+.vault li{display:flex;align-items:center;gap:12px;padding:11px 20px}
+.vault li i{flex:none;width:16px;height:16px;border-radius:4px;background:rgba(255,144,0,.35)}
+.vault li span{filter:blur(5px);-webkit-user-select:none;user-select:none;color:var(--text)}
+.vault ul{list-style:none;margin:0 0 6px;padding:0}
+.vault .btn{margin:6px 20px 0}
+.traits{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px 32px;margin-top:clamp(40px,5vh,56px);padding-top:26px;border-top:1px solid var(--line)}
+.traits > div{display:grid;grid-template-columns:28px 1fr;gap:16px}
+.traits svg{width:24px;height:24px;margin-top:2px;fill:none;stroke:var(--orange);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.traits p{margin:0;font-size:16px;color:var(--mute)}
+
+/* Download */
+.dl{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.dl a{position:relative;display:flex;flex-direction:column;justify-content:space-between;gap:28px;min-height:160px;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--card);text-decoration:none;transition:border-color .25s,transform .35s var(--e-out),background .25s}
+.dl a:hover{border-color:var(--orange);transform:translateY(-3px)}
+.dl a.yours{border-color:rgba(255,144,0,.55);background:linear-gradient(180deg,rgba(255,144,0,.08),transparent 60%),var(--card)}
+.dl a.yours::before{content:"Ваша система";position:absolute;top:-11px;left:18px;padding:5px 9px;border-radius:999px;background:var(--orange);color:var(--ink);font:500 11px/1 var(--mono);letter-spacing:.03em}
+.dl b{display:block;font:700 23px/1.1 var(--display);letter-spacing:-.02em}
+.dl span{display:block;margin-top:8px;font:500 12.5px/1.4 var(--mono);color:var(--mute)}
+.dl em{align-self:flex-end;font-style:normal;font-size:20px;line-height:1;color:var(--orange);transition:transform .35s var(--e-out)}
+.dl a:hover em{transform:translate(2px,2px)}
+
+footer{padding:44px 0 60px;border-top:1px solid var(--line);font-size:14px;color:var(--dim)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:18px 36px}
+footer nav{display:flex;gap:24px}
+footer a{text-decoration:none;transition:color .2s}
+footer a:hover{color:var(--text)}
+
+@media (max-width:980px){
+  .page{grid-template-columns:1fr}
+  .side{display:none}
+}
+@media (max-width:900px){
+  .nav ul{display:none}
+  .hero-grid,.ch-head,.split,.duo{grid-template-columns:1fr}
+  .points{grid-template-columns:1fr}
+  .points > div{padding:22px 0;border-bottom:1px solid var(--line)}
+  .row{grid-template-columns:1fr auto;gap:10px 16px}
+  .row .bar{grid-column:1 / -1;grid-row:2}
+  .traits{grid-template-columns:1fr}
+  .dl{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:22px}
+  .dl a:last-child{grid-column:1 / -1}
+  .p-hint{text-align:left}
+}
+@media (max-width:560px){
+  .note{font-size:11.5px;gap:8px}
+  .note::before{width:18px}
+  .p-play{width:58px;height:58px}
+  .p-skip{display:none}
+  .cta .btn{flex:1 1 100%}
+  .page{padding:14px}
+  .chrome .dots{display:none}
+  .desk{aspect-ratio:4/3.2}
+  .mini{width:56%}
+  .pad{grid-template-columns:repeat(3,58px)}
+  .menu{width:224px}
+  .routes .meta{flex-direction:column;gap:2px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .glow,.mini,.vid .sun{animation:none}
+  .p-track .ad{display:none}
+  .js .reveal,.js .fade,.w > span,.js .lockup .you > span,.js .lockup .tube,.js .lockup .tube > span{opacity:1;transform:none;clip-path:none;transition:none}
+  .bar span,.lockup .you,.note,.player{transition:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="chapters" aria-label="Главы страницы"></nav>
+
+<header class="nav">
+  <div class="wrap">
+    <a class="brand" href="#intro"><img src="mark-orange.svg" alt="" width="28" height="28">Proxys Browser</a>
+    <ul>
+      <li><a href="#ads">Без рекламы</a></li>
+      <li><a href="#vpn">Без VPN</a></li>
+      <li><a href="#video">Видео</a></li>
+      <li><a href="#private">Приватность</a></li>
+    </ul>
+    <a class="btn btn-primary btn-sm" href="#download">Скачать</a>
+  </div>
+</header>
+
+<main>
+  <!-- 00:00 Intro -->
+  <section class="hero" id="intro" data-chapter="Вступление" data-time="00:00">
+    <div class="wrap">
+      <div class="hero-in">
+        <p class="tc fade"><b>00:00</b> Proxys Browser</p>
+        <h1>
+          <span class="h1-top" data-words>Лучший браузер для</span>
+          <span class="lockup"><span class="you"><span>You</span></span><span class="tube"><span>Tube</span></span><span class="note" aria-hidden="true">подходит для любого Tube</span></span>
+        </h1>
+
+        <div class="hero-grid">
+          <div class="fade" style="--rd:.9s">
+            <p class="lead"><strong>Ролики начинаются сразу, без рекламы.</strong><a href="#ads-note" aria-label="Примечание">*</a> YouTube открывается без отдельного VPN. А что вы смотрите после полуночи — не наше дело.</p>
+            <div class="cta">
+              <a class="btn btn-primary" href="#download"><span class="lbl">Скачать Proxys Browser</span><span class="arr" aria-hidden="true">↓</span></a>
+              <a class="btn btn-ghost" href="#ads">Что внутри</a>
+            </div>
+            <p class="platforms">Windows · Mac · Linux · Android · iPhone</p>
+          </div>
+
+          <div class="fade" style="--rd:1.1s">
+            <div class="player-wrap">
+              <div class="player" id="hero-player" role="button" tabindex="0" aria-pressed="false" aria-label="Смотреть">
+                <div class="glow"></div><div class="glow two"></div>
+                <div class="p-chip"><i></i>Реклама: 0 с</div>
+                <div class="p-play" aria-hidden="true">
+                  <svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+                  <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+                </div>
+                <div class="p-bottom">
+                  <div class="p-track">
+                    <span class="done"></span>
+                    <span class="ad" style="left:12%;--d:1.9s"></span>
+                    <span class="ad" style="left:51%;--d:2.15s"></span>
+                    <span class="ad" style="left:79%;--d:2.4s"></span>
+                    <span class="knob"></span>
+                  </div>
+                  <div class="p-row">
+                    <span class="p-time num">4:21 / 12:47</span>
+                    <span class="p-skip">Пропускать нечего <svg viewBox="0 0 24 24"><path d="M5 5v14l10-7zM17 5h2.5v14H17z"/></svg></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="p-hint">Нажмите — ролик пойдёт без единой рекламы</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 00:24 Without ads -->
+  <section class="ch" id="ads" data-chapter="Без рекламы" data-time="00:24">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>00:24</b> Без рекламы</p>
+          <h2 data-words>Ролик начинается с ролика.</h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">Браузер убирает рекламу в роликах и отрезает баннеры, всплывающие окна и трекеры на всех сайтах ещё до загрузки страницы.</p>
+      </div>
+
+      <div class="panel compare reveal" id="compare">
+        <div class="setting">
+          <div><b>Реклама в YouTube</b><small>Настройки → Блокировка</small></div>
+          <button class="switch" id="yt-ads" type="button" role="switch" aria-checked="false" aria-label="Убирать рекламу в YouTube"></button>
+        </div>
+        <div class="compare-body">
+          <div class="row">
+            <span class="lbl">Обычный браузер</span>
+            <div class="bar" aria-hidden="true"><span class="a" style="flex:7 1 0"></span><span style="flex:30 1 0"></span><span class="a" style="flex:11 1 0"></span><span style="flex:26 1 0"></span><span class="a" style="flex:7 1 0"></span><span style="flex:19 1 0"></span></div>
+            <span class="val"><span>3 рекламы</span></span>
+          </div>
+          <div class="row ours">
+            <span class="lbl">Proxys Browser</span>
+            <div class="bar" aria-hidden="true"><span class="a" style="flex:7 1 0"></span><span style="flex:30 1 0"></span><span class="a" style="flex:11 1 0"></span><span style="flex:26 1 0"></span><span class="a" style="flex:7 1 0"></span><span style="flex:19 1 0"></span></div>
+            <span class="val" aria-live="polite"><span class="v-off">3 рекламы</span><span class="v-on">сразу ролик</span></span>
+          </div>
+          <div class="legend" aria-hidden="true"><span><i></i>реклама</span><span><i class="v"></i>ролик</span></div>
+        </div>
+      </div>
+      <p class="caption reveal">Переключатель работает: так выглядит пункт в настройках браузера.</p>
+
+      <div class="points">
+        <div class="reveal"><h3>Включено с первого запуска</h3><p>Пункт «Реклама в YouTube» уже включён. Аккаунт и настройки не нужны.</p></div>
+        <div class="reveal" style="--rd:.08s"><h3>Ролик остаётся целым</h3><p>Рекламу, которую автор записал сам, браузер не трогает: это часть ролика.</p></div>
+        <div class="reveal" style="--rd:.16s"><h3>Можно вернуть</h3><p>Хотите поддержать любимый канал — выключите пункт, и реклама вернётся.</p></div>
+      </div>
+      <p class="foot reveal" id="ads-note">* «Реклама в YouTube» работает в версиях для Windows, Mac и Linux. YouTube иногда меняет показ рекламы. Если она проскочила, напишите в поддержку.</p>
+    </div>
+  </section>
+
+  <!-- 01:07 Without VPN -->
+  <section class="ch" id="vpn" data-chapter="Без VPN" data-time="01:07">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>01:07</b> Без VPN</p>
+          <h2 data-words>VPN включать не нужно.</h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">Браузер сам пускает закрытые сайты через встроенный ProxysVPN. Банки, Госуслуги и маркетплейсы открываются напрямую, как обычно.</p>
+      </div>
+
+      <div class="split">
+        <div class="reveal">
+          <div class="panel routes" id="routes">
+            <p class="seg-for">Режим для <b class="seg-name">youtube.com</b></p>
+            <div class="seg" role="radiogroup" aria-label="Режим для выбранного сайта">
+              <span class="thumb" aria-hidden="true"></span>
+              <button type="button" role="radio" aria-checked="true">Авто</button>
+              <button type="button" role="radio" aria-checked="false">Туннель</button>
+              <button type="button" role="radio" aria-checked="false">Напрямую</button>
+            </div>
+            <button class="route" type="button" aria-pressed="true" data-name="youtube.com" data-blocked="1"><span class="dom">youtube.com</span><span class="st"><i></i><span class="st-t"></span></span></button>
+            <button class="route" type="button" aria-pressed="false" data-name="этого сайта" data-blocked="1"><span class="dom"><span class="redact" aria-label="скрыто"></span>.com</span><span class="st"><i></i><span class="st-t"></span></span></button>
+            <button class="route" type="button" aria-pressed="false" data-name="sberbank.ru" data-blocked="0"><span class="dom">sberbank.ru</span><span class="st"><i></i><span class="st-t"></span></span></button>
+            <button class="route" type="button" aria-pressed="false" data-name="gosuslugi.ru" data-blocked="0"><span class="dom">gosuslugi.ru</span><span class="st"><i></i><span class="st-t"></span></span></button>
+            <div class="meta"><span>Страна туннеля: <b>Нидерланды</b></span><span>Выберите сайт и режим</span></div>
+          </div>
+        </div>
+        <div class="list">
+          <div class="reveal"><h3><i>Авто.</i> Само разберётся</h3><p>Закрытые сайты идут через ProxysVPN, всё остальное — напрямую.</p></div>
+          <div class="reveal" style="--rd:.08s"><h3><i>Туннель.</i> Всегда через ProxysVPN</h3><p>Для сайта, который вы хотите открывать только через защищённое соединение.</p></div>
+          <div class="reveal" style="--rd:.16s"><h3><i>Напрямую.</i> Без туннеля</h3><p>Например, для звонков, чтобы голос не запаздывал.</p></div>
+          <p class="foot reveal" style="--rd:.24s">В браузере это окно открывается по значку Proxys справа от адреса. Для туннеля нужен аккаунт ProxysVPN: вход по коду из бота в Telegram, без пароля.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 01:48 Video download -->
+  <section class="ch" id="video" data-chapter="Видео в один клик" data-time="01:48">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>01:48</b> Видео в один клик</p>
+          <h2 data-words>Понравилось видео? <em>Оно ваше.</em></h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">Правый клик по видео → «Скачать видео». Почти с любого сайта, без сайтов-скачивалок, рекламы и расширений. Один файл в лучшем качестве, обычно MP4.</p>
+      </div>
+
+      <div class="panel demo reveal" id="dl-demo">
+        <div class="chrome">
+          <div class="dots" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div class="addr"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>vkvideo.ru<img src="mark-orange.svg" alt=""></div>
+        </div>
+        <div class="page">
+          <div>
+            <div class="vid" role="button" tabindex="0" aria-haspopup="menu" aria-label="Видео «Горы на рассвете». Открыть меню">
+              <svg class="scene" viewBox="0 0 640 360" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+                <defs>
+                  <linearGradient id="dawn" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#1d0f07"/>
+                    <stop offset=".5" stop-color="#9a4c0b"/>
+                    <stop offset=".78" stop-color="#ff9a2e"/>
+                    <stop offset="1" stop-color="#ffcf8a"/>
+                  </linearGradient>
+                </defs>
+                <rect width="640" height="360" fill="url(#dawn)"/>
+                <circle class="sun" cx="430" cy="236" r="44" fill="#ffe2b0"/>
+                <path d="M0 238 70 196 128 222 214 150 292 214 352 178 420 232 498 160 572 206 640 176V360H0z" fill="#5a2c0b"/>
+                <path d="M0 276 96 230 176 268 268 214 362 270 452 228 540 262 640 226V360H0z" fill="#2c1507"/>
+                <path d="M0 312 120 278 230 308 340 272 470 312 560 286 640 300V360H0z" fill="#120904"/>
+              </svg>
+              <div class="p-bottom" style="z-index:2">
+                <div class="p-track" style="--at:33%"><span class="done"></span><span class="knob"></span></div>
+                <div class="p-row"><span class="num">1:04 / 3:12</span></div>
+              </div>
+            </div>
+            <div class="vid-meta"><b>Горы на рассвете</b><span>3:12</span></div>
+          </div>
+          <div class="side" aria-hidden="true">
+            <div><i></i><span><u></u><u></u></span></div>
+            <div><i></i><span><u></u><u></u></span></div>
+            <div><i></i><span><u></u><u></u></span></div>
+            <div><i></i><span><u></u><u></u></span></div>
+          </div>
+        </div>
+
+        <div class="menu" role="menu" aria-label="Меню видео">
+          <button class="dl-item" type="button" role="menuitem"><img src="mark-orange.svg" alt="">Скачать видео</button>
+          <hr>
+          <button type="button" role="menuitem">Картинка в картинке</button>
+          <button type="button" role="menuitem">Копировать URL видео</button>
+        </div>
+
+        <div class="toast" role="status" aria-live="polite">
+          <div class="ring">
+            <svg viewBox="0 0 34 34" aria-hidden="true"><circle class="bg" cx="17" cy="17" r="13"/><circle class="fg" cx="17" cy="17" r="13"/></svg>
+            <svg class="ok" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+          </div>
+          <div style="min-width:0"><b class="t-title num">Скачиваю видео: 0%</b><small class="t-sub">Горы на рассвете.mp4</small></div>
+        </div>
+
+        <svg class="cursor" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l14 8.2-6.3 1.4L9.6 19z" fill="#fff" stroke="#0b0b0b" stroke-width="1.4" stroke-linejoin="round"/></svg>
+      </div>
+      <p class="caption reveal dl-hint">Попробуйте сами: щёлкните по видео правой кнопкой.</p>
+
+      <div class="points">
+        <div class="reveal"><h3>Один файл, обычно MP4</h3><p>Видео, которое сайт отдаёт кусочками, браузер склеивает в один файл. Если сайт отдаёт только WebM VP9, файл будет .webm: его откроют сам браузер и VLC.</p></div>
+        <div class="reveal" style="--rd:.08s"><h3>Быстро</h3><p>Видео качается частями сразу по нескольким соединениям. Ход скачивания виден на странице.</p></div>
+        <div class="reveal" style="--rd:.16s"><h3>Даже со своим меню у плеера</h3><p>Например, во ВКонтакте. Меню самого сайта — правый клик с зажатой Alt, на Mac — Option.</p></div>
+      </div>
+      <p class="foot reveal">Работает в версиях для Windows, Mac, Linux и Android. На Android включите видео, откройте меню ≡ и выберите «Скачать видео». <b>Не скачиваются YouTube, прямые трансляции и защищённые сервисы</b> вроде онлайн-кинотеатров.</p>
+    </div>
+  </section>
+
+  <!-- 02:31 Picture in picture -->
+  <section class="ch" id="pip" data-chapter="Поверх окон" data-time="02:31">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>02:31</b> Поверх окон</p>
+          <h2 data-words>Смотрите и занимайтесь делом.</h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">Ролик висит поверх всех окон. Лекция или подкаст идут в углу экрана, а вы отвечаете в мессенджере или работаете в таблице.</p>
+      </div>
+
+      <div class="split">
+        <div class="desk reveal" id="desk" aria-label="Пример: ролик в маленьком окне поверх таблицы">
+          <div class="bar-top"><i></i><i></i><i></i><span>Отчёт за квартал</span></div>
+          <div class="sheet" aria-hidden="true"></div>
+          <div class="cell" aria-hidden="true"></div>
+          <div class="mini" tabindex="0" role="group" aria-label="Окно с роликом. Перетащите или двигайте стрелками">
+            <div class="glow"></div>
+            <div class="p-play" aria-hidden="true"><svg class="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12.5-7.5z"/></svg></div>
+            <div class="p-track" style="--at:62%"><span class="done"></span><span class="knob"></span></div>
+          </div>
+        </div>
+        <div>
+          <div class="list">
+            <div class="reveal"><h3>Одно сочетание клавиш</h3><p>Нажмите его на любом ролике — и окно с видео повиснет поверх всего. Здесь тоже работает.</p></div>
+            <div class="reveal" style="--rd:.08s"><h3>Куда удобно</h3><p>Окно с роликом можно утащить в любой угол. Попробуйте на примере слева.</p></div>
+          </div>
+          <button class="keys reveal" style="--rd:.16s" type="button" aria-label="Показать или убрать окно с роликом (Alt, Shift, P)"><kbd data-k="Alt">Alt</kbd>+<kbd data-k="Shift">Shift</kbd>+<kbd data-k="P">P</kbd></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03:05 Private -->
+  <section class="ch private" id="private" data-chapter="Не наше дело" data-time="03:05">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>03:05</b> Приватность</p>
+          <h2 data-words>Что вы смотрите&nbsp;— <em>не наше дело.</em></h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">И не дело того, кто сядет за компьютер после вас.</p>
+      </div>
+
+      <div class="duo">
+        <div class="reveal">
+          <div class="panel box" id="burn">
+            <div class="panel-head">
+              <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg>История</span>
+              <button class="btn btn-primary btn-sm fire" type="button">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="stroke:currentColor"><path d="M12 21a6 6 0 0 0 6-6c0-3.6-2.6-5.6-3.6-8.6-.5 2-1.4 3.1-2.4 3.6C12 7 11 5 9.5 3 9.7 6.6 6 9 6 15a6 6 0 0 0 6 6z"/></svg>
+                Сжечь
+              </button>
+            </div>
+            <ol class="hist">
+              <li style="--i:0"><time>22:47</time><span><span class="t">Как приготовить рататуй</span><span class="u">youtube.com</span></span></li>
+              <li style="--i:1"><time>23:30</time><span><span class="t">Лекция: откуда берутся чёрные дыры</span><span class="u">youtube.com</span></span></li>
+              <li style="--i:2"><time>00:52</time><span aria-label="скрыто"><span class="t hide">Без названия, вкладка</span><span class="u hide">скрыто.com</span></span></li>
+              <li style="--i:3"><time>01:34</time><span aria-label="скрыто"><span class="t hide">Без названия и подписи</span><span class="u hide">тоже-скрыто.com</span></span></li>
+              <li style="--i:4"><time>02:16</time><span aria-label="скрыто"><span class="t hide">Ещё одна без названия</span><span class="u hide">скрыто.net</span></span></li>
+            </ol>
+            <div class="state empty" aria-live="polite">
+              <b>История пуста.</b>
+              <p>Как будто ничего и не было.</p>
+              <button class="btn btn-ghost btn-sm again" type="button">Показать пример снова</button>
+            </div>
+          </div>
+          <p class="caption"><b style="font-weight:500;color:var(--mute)">«Сжечь»</b> — одна кнопка стирает историю и данные сайтов.</p>
+        </div>
+
+        <div class="reveal" style="--rd:.1s">
+          <div class="panel box" id="pin" aria-label="Пример секретного профиля">
+            <div class="panel-head">
+              <span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>Секретный профиль</span>
+            </div>
+            <div class="locked">
+              <p>Введите PIN</p>
+              <div class="dots4" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+              <div class="pad">
+                <button type="button" data-k="1">1</button><button type="button" data-k="2">2</button><button type="button" data-k="3">3</button>
+                <button type="button" data-k="4">4</button><button type="button" data-k="5">5</button><button type="button" data-k="6">6</button>
+                <button type="button" data-k="7">7</button><button type="button" data-k="8">8</button><button type="button" data-k="9">9</button>
+                <span class="blank"></span><button type="button" data-k="0">0</button><button class="del" type="button" data-k="del" aria-label="Стереть">⌫</button>
+              </div>
+            </div>
+            <div class="vault" aria-live="polite">
+              <ul>
+                <li><i></i><span>Вкладка без названия</span></li>
+                <li><i></i><span>Ещё одна вкладка</span></li>
+                <li><i></i><span>Совсем личное</span></li>
+              </ul>
+              <button class="btn btn-ghost btn-sm relock" type="button">Закрыть профиль</button>
+            </div>
+          </div>
+          <p class="caption">Без PIN профиль не открыть и не увидеть, что в нём. В примере подойдут любые 4 цифры.</p>
+        </div>
+      </div>
+
+      <div class="traits">
+        <div class="reveal">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="13" height="11" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-3"/></svg>
+          <div><h3>Окна-личности</h3><p>Отдельное окно для работы, покупок или второго аккаунта. У каждого свои входы и история.</p></div>
+        </div>
+        <div class="reveal" style="--rd:.08s">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg>
+          <div><h3>Чужие cookies закрыты</h3><p>Сторонние сайты не узнают вас по cookie на другом сайте. Отпечаток браузера размыт.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03:40 Download -->
+  <section class="ch" id="download" data-chapter="Скачать" data-time="03:40">
+    <div class="wrap">
+      <div class="ch-head">
+        <div>
+          <p class="tc reveal"><b>03:40</b> Скачать</p>
+          <h2 data-words>Скачайте <span style="white-space:nowrap">Proxys Browser</span></h2>
+        </div>
+        <p class="lead reveal" style="--rd:.15s">Реклама блокируется сразу, вход не нужен. Для ProxysVPN — код из бота в Telegram.</p>
+      </div>
+      <div class="dl">
+        <a class="reveal" data-os="windows" href="https://getprxs.com/#download"><div><b>Windows</b><span>Windows 10 и 11</span></div><em aria-hidden="true">↓</em></a>
+        <a class="reveal" style="--rd:.05s" data-os="mac" href="https://getprxs.com/#download"><div><b>Mac</b><span>Файл .dmg</span></div><em aria-hidden="true">↓</em></a>
+        <a class="reveal" style="--rd:.1s" data-os="linux" href="https://getprxs.com/#download"><div><b>Linux</b><span>Одна команда в Терминале</span></div><em aria-hidden="true">↓</em></a>
+        <a class="reveal" style="--rd:.15s" data-os="android" href="https://getprxs.com/#download"><div><b>Android</b><span>Google Play</span></div><em aria-hidden="true">↗</em></a>
+        <a class="reveal" style="--rd:.2s" data-os="ios" href="https://getprxs.com/#download"><div><b>iPhone</b><span>TestFlight · бета</span></div><em aria-hidden="true">↗</em></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Proxys Browser — от команды ProxysVPN</span>
+    <nav aria-label="Ссылки"><a href="https://getprxs.com/guides">Гайды</a><a href="https://getprxs.com/privacy">Конфиденциальность</a></nav>
+    <span>YouTube — товарный знак Google LLC. Proxys Browser не связан с Google.</span>
+  </div>
+</footer>
+
+<script>
+(() => {
+  "use strict";
+  const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fine = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+  const $ = (selector, root = document) => root.querySelector(selector);
+  const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+  const sleep = (ms) => new Promise((done) => window.setTimeout(done, ms));
+  const place = (el, x, y) => { el.style.left = `${x}px`; el.style.top = `${y}px`; };
+  const once = (el, fn, threshold = 0.25) => {
+    if (!("IntersectionObserver" in window)) { fn(); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) { io.disconnect(); fn(); }
+    }, { threshold });
+    io.observe(el);
+  };
+  const watch = (el, fn, threshold = 0) => {
+    if (!("IntersectionObserver" in window)) { fn(true); return; }
+    new IntersectionObserver((entries) => entries.forEach((entry) => fn(entry.isIntersecting)), { threshold }).observe(el);
+  };
+
+  /* Headlines rise word by word from a mask. Splits on ordinary spaces only, so a no-break space keeps "смотрите —" together. */
+  const splitWords = (root) => {
+    let index = 0;
+    const walk = (node) => {
+      Array.from(node.childNodes).forEach((child) => {
+        if (child.nodeType === Node.TEXT_NODE) {
+          const frag = document.createDocumentFragment();
+          child.textContent.split(/([ \t\n\r]+)/).forEach((part) => {
+            if (!part) return;
+            if (/^[ \t\n\r]+$/.test(part)) { frag.append(document.createTextNode(" ")); return; }
+            const outer = document.createElement("span");
+            const inner = document.createElement("span");
+            outer.className = "w";
+            inner.textContent = part;
+            inner.style.setProperty("--i", String(index++));
+            outer.append(inner);
+            frag.append(outer);
+          });
+          child.replaceWith(frag);
+        } else if (child.nodeType === Node.ELEMENT_NODE) {
+          walk(child);
+        }
+      });
+    };
+    walk(root);
+  };
+  if (!reduce) $$("[data-words]").forEach(splitWords);
+  $$("section.ch [data-words], .reveal").forEach((el) => once(el, () => el.classList.add("in"), 0.18));
+
+  /* Intro: words, the lockup, then the rest. */
+  const hero = $(".hero-in");
+  const lockup = $(".lockup");
+  /* A tab opened in the background gets no animation frames, so a timer backs the frame up; both calls are idempotent. */
+  const startIntro = () => {
+    $(".h1-top").classList.add("in");
+    lockup.classList.add("ready");
+    hero.classList.add("ready-all");
+  };
+  window.requestAnimationFrame(startIntro);
+  window.setTimeout(startIntro, 120);
+
+  /* The wink: "You" fades, the orange "Tube" stays. */
+  let wink = 0;
+  const winkOn = () => { lockup.classList.add("dim"); wink = window.setTimeout(winkOff, 3200); };
+  const winkOff = () => { lockup.classList.remove("dim"); wink = window.setTimeout(winkOn, 4800); };
+  if (reduce) {
+    lockup.classList.add("still");
+  } else {
+    wink = window.setTimeout(winkOn, 3400);
+    lockup.addEventListener("mouseenter", () => { window.clearTimeout(wink); lockup.classList.add("dim"); });
+    lockup.addEventListener("mouseleave", () => { window.clearTimeout(wink); winkOff(); });
+    lockup.addEventListener("click", () => { window.clearTimeout(wink); lockup.classList.toggle("dim"); });
+  }
+
+  /* Hero player: plays without a single ad. */
+  const player = $("#hero-player");
+  const ptrack = $(".p-track", player);
+  const pclock = $(".p-time", player);
+  const total = 767;
+  let at = 261;
+  let playing = false;
+  let tick = 0;
+  const clock = (s) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const paintPlayer = () => {
+    ptrack.style.setProperty("--at", `${((at / total) * 100).toFixed(3)}%`);
+    pclock.textContent = `${clock(at)} / ${clock(total)}`;
+  };
+  const setPlaying = (on) => {
+    playing = on;
+    player.classList.toggle("playing", on);
+    player.setAttribute("aria-pressed", String(on));
+    player.setAttribute("aria-label", on ? "Пауза" : "Смотреть");
+    window.clearInterval(tick);
+    if (on) tick = window.setInterval(() => { at = at + 1 >= total ? 0 : at + 1; paintPlayer(); }, 1000);
+  };
+  player.addEventListener("click", () => setPlaying(!playing));
+  player.addEventListener("keydown", (event) => {
+    if (event.key === " " || event.key === "Enter") { event.preventDefault(); setPlaying(!playing); }
+  });
+  watch(player, (visible) => { if (!visible && playing) setPlaying(false); });
+  document.addEventListener("visibilitychange", () => { if (document.hidden && playing) setPlaying(false); });
+  paintPlayer();
+  if (fine && !reduce) {
+    const wrap = $(".player-wrap");
+    wrap.addEventListener("pointermove", (event) => {
+      const box = wrap.getBoundingClientRect();
+      const x = (event.clientX - box.left) / box.width - 0.5;
+      const y = (event.clientY - box.top) / box.height - 0.5;
+      player.style.setProperty("--ry", `${(x * 5).toFixed(2)}deg`);
+      player.style.setProperty("--rx", `${(-y * 5).toFixed(2)}deg`);
+    });
+    wrap.addEventListener("pointerleave", () => { player.style.setProperty("--ry", "0deg"); player.style.setProperty("--rx", "0deg"); });
+  }
+
+  /* Chapter bar: one segment per section, sized by the section, filled by scroll; the nav link of the current chapter lights up. */
+  const bar = $(".chapters");
+  const sections = $$("[data-chapter]");
+  const segments = sections.map((section) => {
+    const link = document.createElement("a");
+    link.href = `#${section.id}`;
+    link.dataset.time = section.dataset.time || "";
+    link.dataset.label = section.dataset.chapter || "";
+    link.setAttribute("aria-label", `${link.dataset.time} ${link.dataset.label}`);
+    link.append(document.createElement("i"));
+    bar.append(link);
+    return link;
+  });
+  const navLinks = $$(".nav ul a");
+  const nav = $(".nav");
+  let spans = [];
+  let queued = false;
+  const update = () => {
+    queued = false;
+    const doc = document.documentElement;
+    const room = Math.max(doc.scrollHeight - window.innerHeight, 1);
+    const pos = (window.scrollY / room) * doc.scrollHeight;
+    let current = sections[0].id;
+    spans.forEach(({ start, end, id }, index) => {
+      const share = Math.min(Math.max((pos - start) / (end - start), 0), 1);
+      segments[index].style.setProperty("--f", share.toFixed(4));
+      if (window.scrollY + window.innerHeight * 0.4 >= start) current = id;
+    });
+    navLinks.forEach((link) => link.classList.toggle("on", link.getAttribute("href") === `#${current}`));
+    nav.classList.toggle("scrolled", window.scrollY > 8);
+  };
+  const layout = () => {
+    const total = document.documentElement.scrollHeight;
+    spans = sections.map((section, index) => {
+      const start = section.offsetTop;
+      const end = index + 1 < sections.length ? sections[index + 1].offsetTop : total;
+      segments[index].style.flexGrow = String(Math.max(end - start, 1));
+      return { start, end, id: section.id };
+    });
+    update();
+  };
+  window.addEventListener("scroll", () => { if (!queued) { queued = true; window.requestAnimationFrame(update); } }, { passive: true });
+  window.addEventListener("resize", layout);
+  window.addEventListener("load", layout);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout).catch(layout);
+  layout();
+
+  /* Ads: the real switch from the settings. It turns itself on the first time it comes into view. */
+  const compare = $("#compare");
+  const ytSwitch = $("#yt-ads");
+  let switchTouched = false;
+  const setBlocked = (on) => { compare.classList.toggle("blocked", on); ytSwitch.setAttribute("aria-checked", String(on)); };
+  ytSwitch.addEventListener("click", () => { switchTouched = true; setBlocked(ytSwitch.getAttribute("aria-checked") !== "true"); });
+  if (reduce) setBlocked(true);
+  else once(compare, () => window.setTimeout(() => { if (!switchTouched) setBlocked(true); }, 900), 0.5);
+
+  /* VPN: pick a site, pick a mode. */
+  const routes = $$(".route");
+  const segBox = $(".seg");
+  const segButtons = $$(".seg button");
+  const segName = $(".seg-name");
+  const modes = ["auto", "tunnel", "direct"];
+  const modeOf = new Map(routes.map((route) => [route, "auto"]));
+  let picked = routes[0];
+  const routeText = (route) => {
+    const mode = modeOf.get(route);
+    const viaTunnel = mode === "tunnel" || (mode === "auto" && route.dataset.blocked === "1");
+    return { viaTunnel, html: `${viaTunnel ? "Туннель" : "Напрямую"}${mode === "auto" ? " <em>авто</em>" : ""}` };
+  };
+  const paintRoute = (route, animate) => {
+    const st = $(".st", route);
+    const label = $(".st-t", st);
+    const { viaTunnel, html } = routeText(route);
+    const apply = () => { label.innerHTML = html; st.classList.toggle("tun", viaTunnel); st.classList.remove("flip"); };
+    if (!animate || reduce) { apply(); return; }
+    st.classList.add("flip");
+    window.setTimeout(apply, 170);
+  };
+  const paintSeg = () => {
+    const index = modes.indexOf(modeOf.get(picked));
+    segBox.style.setProperty("--idx", String(index));
+    segButtons.forEach((button, i) => button.setAttribute("aria-checked", String(i === index)));
+    segName.textContent = picked.dataset.name || "";
+  };
+  routes.forEach((route) => {
+    paintRoute(route, false);
+    route.addEventListener("click", () => {
+      picked = route;
+      routes.forEach((other) => other.setAttribute("aria-pressed", String(other === route)));
+      paintSeg();
+    });
+  });
+  segButtons.forEach((button, index) => button.addEventListener("click", () => {
+    if (modeOf.get(picked) === modes[index]) return;
+    modeOf.set(picked, modes[index]);
+    paintSeg();
+    paintRoute(picked, true);
+  }));
+  segBox.addEventListener("keydown", (event) => {
+    if (event.key !== "ArrowRight" && event.key !== "ArrowLeft") return;
+    event.preventDefault();
+    const index = modes.indexOf(modeOf.get(picked));
+    const next = (index + (event.key === "ArrowRight" ? 1 : 2)) % 3;
+    segButtons[next].click();
+    segButtons[next].focus();
+  });
+  paintSeg();
+
+  /* Video download: right click → "Скачать видео" → progress → saved. Plays by itself until the visitor tries it. */
+  const demo = $("#dl-demo");
+  const vid = $(".vid", demo);
+  const menu = $(".menu", demo);
+  const dlItem = $(".dl-item", menu);
+  const toast = $(".toast", demo);
+  const ring = $(".ring .fg", toast);
+  const tTitle = $(".t-title", toast);
+  const cursor = $(".cursor", demo);
+  const hint = $(".dl-hint");
+  const RING = 2 * Math.PI * 13;
+  ring.style.strokeDasharray = String(RING);
+  ring.style.strokeDashoffset = String(RING);
+  if (!fine) hint.textContent = "Попробуйте сами: коснитесь видео.";
+  let busy = false;
+  let autoplay = !reduce;
+  let demoVisible = false;
+  const rel = (x, y) => { const box = demo.getBoundingClientRect(); return [x - box.left, y - box.top]; };
+  const openMenu = (x, y) => {
+    const box = demo.getBoundingClientRect();
+    const w = menu.offsetWidth || 250;
+    const h = menu.offsetHeight || 140;
+    place(menu, Math.max(8, Math.min(x, box.width - w - 10)), Math.max(8, Math.min(y, box.height - h - 10)));
+    menu.classList.add("open");
+  };
+  const closeMenu = () => menu.classList.remove("open");
+  const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+  const download = async () => {
+    if (busy) return;
+    busy = true;
+    closeMenu();
+    toast.classList.remove("done");
+    tTitle.textContent = "Скачиваю видео: 0%";
+    ring.style.strokeDashoffset = String(RING);
+    toast.classList.add("show");
+    const duration = reduce ? 1 : 2800;
+    const start = performance.now();
+    await new Promise((done) => {
+      const step = (now) => {
+        const p = Math.min((now - start) / duration, 1);
+        const e = ease(p);
+        tTitle.textContent = `Скачиваю видео: ${Math.round(e * 100)}%`;
+        ring.style.strokeDashoffset = String(RING * (1 - e));
+        if (p < 1) window.requestAnimationFrame(step); else done();
+      };
+      window.requestAnimationFrame(step);
+    });
+    tTitle.textContent = "Сохраняю файл…";
+    await sleep(reduce ? 0 : 450);
+    toast.classList.add("done");
+    tTitle.textContent = "Видео сохранено";
+    await sleep(2600);
+    toast.classList.remove("show");
+    await sleep(450);
+    busy = false;
+  };
+  const takeOver = () => {
+    if (!autoplay) return;
+    autoplay = false;
+    cursor.classList.remove("on");
+    dlItem.classList.remove("hot");
+  };
+  vid.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    takeOver();
+    if (busy) return;
+    const [x, y] = rel(event.clientX, event.clientY);
+    openMenu(x, y);
+  });
+  vid.addEventListener("click", (event) => {
+    takeOver();
+    if (busy) return;
+    const [x, y] = rel(event.clientX, event.clientY);
+    openMenu(x, y);
+  });
+  vid.addEventListener("keydown", (event) => {
+    if (event.key !== "Enter" && event.key !== " " && event.key !== "ContextMenu") return;
+    event.preventDefault();
+    takeOver();
+    if (busy) return;
+    const v = vid.getBoundingClientRect();
+    const [x, y] = rel(v.left + v.width / 2, v.top + v.height / 2);
+    openMenu(x, y);
+    dlItem.focus({ preventScroll: true });
+  });
+  dlItem.addEventListener("click", () => { takeOver(); download(); });
+  $$("button:not(.dl-item)", menu).forEach((button) => button.addEventListener("click", () => { takeOver(); closeMenu(); }));
+  document.addEventListener("pointerdown", (event) => { if (!menu.contains(event.target) && !vid.contains(event.target)) closeMenu(); });
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeMenu(); });
+
+  let cx = 0;
+  let cy = 0;
+  const jump = (x, y) => { cursor.getAnimations().forEach((a) => a.cancel()); cx = x; cy = y; cursor.style.transform = `translate(${x}px, ${y}px)`; };
+  const glide = async (x, y, ms) => {
+    const anim = cursor.animate([{ transform: `translate(${cx}px, ${cy}px)` }, { transform: `translate(${x}px, ${y}px)` }], { duration: ms, easing: "cubic-bezier(.65,0,.35,1)", fill: "forwards" });
+    cx = x; cy = y;
+    try { await anim.finished; cursor.style.transform = `translate(${x}px, ${y}px)`; anim.cancel(); } catch { /* cancelled by a take-over */ }
+  };
+  const ripple = (x, y) => {
+    const dot = document.createElement("span");
+    dot.className = "ripple";
+    place(dot, x, y);
+    demo.append(dot);
+    dot.addEventListener("animationend", () => dot.remove());
+  };
+  const tour = async () => {
+    while (autoplay) {
+      if (!demoVisible || busy) { await sleep(400); continue; }
+      const box = demo.getBoundingClientRect();
+      const v = vid.getBoundingClientRect();
+      const vx = v.left - box.left + v.width * 0.58;
+      const vy = v.top - box.top + v.height * 0.45;
+      jump(box.width * 0.9, box.height * 0.92);
+      cursor.classList.add("on");
+      await sleep(350);
+      await glide(vx, vy, 1150);
+      if (!autoplay) break;
+      await sleep(260);
+      ripple(vx, vy);
+      openMenu(vx + 6, vy + 6);
+      await sleep(560);
+      if (!autoplay) break;
+      const item = dlItem.getBoundingClientRect();
+      const ix = item.left - box.left + 64;
+      const iy = item.top - box.top + item.height / 2;
+      await glide(ix, iy, 640);
+      if (!autoplay) break;
+      dlItem.classList.add("hot");
+      await sleep(300);
+      ripple(ix, iy);
+      dlItem.classList.remove("hot");
+      const run = download();
+      await sleep(200);
+      await glide(box.width * 0.9, box.height * 0.92, 900);
+      cursor.classList.remove("on");
+      await run;
+      await sleep(1800);
+    }
+    cursor.classList.remove("on");
+  };
+  watch(demo, (visible) => { demoVisible = visible; }, 0.45);
+  if (autoplay) tour();
+
+  /* Picture in picture: drag the video window to any corner; Alt+Shift+P hides and shows it. */
+  const desk = $("#desk");
+  const mini = $(".mini", desk);
+  const sheet = $(".sheet", desk);
+  const cell = $(".cell", desk);
+  const COLS = 9;
+  const ROWS = 14;
+  for (let r = 0; r < ROWS; r += 1) {
+    for (let c = 0; c < COLS; c += 1) {
+      const box = document.createElement("i");
+      if (r === 0) box.className = "h";
+      else if (c === 0) box.className = "n";
+      const w = (r * 37 + c * 53) % 61;
+      box.style.setProperty("--w", w < 12 ? "0px" : `${20 + w}%`);
+      sheet.append(box);
+    }
+  }
+  const cells = [[2, 3], [3, 3], [3, 5], [4, 6], [2, 7], [5, 4]];
+  let cellAt = 0;
+  const paintCell = () => {
+    const [c, r] = cells[cellAt];
+    cell.style.transform = `translate(${44 + (c - 1) * 112}px, ${36 + r * 34}px)`;
+  };
+  paintCell();
+  let deskVisible = false;
+  watch(desk, (visible) => { deskVisible = visible; });
+  if (!reduce) window.setInterval(() => { if (!deskVisible) return; cellAt = (cellAt + 1) % cells.length; paintCell(); }, 2200);
+
+  const miniTrack = $(".p-track", mini);
+  let miniAt = 62;
+  if (!reduce) window.setInterval(() => { if (!deskVisible) return; miniAt = miniAt >= 99 ? 0 : miniAt + 0.5; miniTrack.style.setProperty("--at", `${miniAt}%`); }, 1000);
+
+  const GAP = 14;
+  const TOP = 36;
+  let corner = "br";
+  const spots = () => {
+    const dw = desk.clientWidth;
+    const dh = desk.clientHeight;
+    const mw = mini.offsetWidth;
+    const mh = mini.offsetHeight;
+    return { tl: [GAP, TOP + GAP], tr: [dw - mw - GAP, TOP + GAP], bl: [GAP, dh - mh - GAP], br: [dw - mw - GAP, dh - mh - GAP] };
+  };
+  const moveMini = (x, y) => { mini.style.translate = `${x}px ${y}px`; mini.dataset.x = String(x); mini.dataset.y = String(y); };
+  const snap = () => { const [x, y] = spots()[corner]; moveMini(x, y); };
+  snap();
+  window.addEventListener("resize", snap);
+  let drag = null;
+  mini.addEventListener("pointerdown", (event) => {
+    drag = { id: event.pointerId, sx: event.clientX, sy: event.clientY, x0: Number(mini.dataset.x || 0), y0: Number(mini.dataset.y || 0) };
+    mini.setPointerCapture(event.pointerId);
+    mini.classList.add("drag");
+  });
+  mini.addEventListener("pointermove", (event) => {
+    if (!drag || event.pointerId !== drag.id) return;
+    const s = spots();
+    const x = Math.min(Math.max(drag.x0 + event.clientX - drag.sx, 4), s.br[0] + GAP - 4);
+    const y = Math.min(Math.max(drag.y0 + event.clientY - drag.sy, TOP + 4), s.br[1] + GAP - 4);
+    moveMini(x, y);
+  });
+  const drop = () => {
+    if (!drag) return;
+    drag = null;
+    mini.classList.remove("drag");
+    const x = Number(mini.dataset.x || 0);
+    const y = Number(mini.dataset.y || 0);
+    const s = spots();
+    corner = Object.keys(s).sort((a, b) => Math.hypot(s[a][0] - x, s[a][1] - y) - Math.hypot(s[b][0] - x, s[b][1] - y))[0];
+    snap();
+  };
+  mini.addEventListener("pointerup", drop);
+  mini.addEventListener("pointercancel", drop);
+  mini.addEventListener("keydown", (event) => {
+    const moves = { ArrowLeft: ["l", null], ArrowRight: ["r", null], ArrowUp: [null, "t"], ArrowDown: [null, "b"] };
+    const move = moves[event.key];
+    if (!move) return;
+    event.preventDefault();
+    const v = move[1] || corner[0];
+    const h = move[0] || corner[1];
+    corner = `${v}${h}`;
+    snap();
+  });
+
+  const keysButton = $(".keys");
+  const kbd = { Alt: $('kbd[data-k="Alt"]'), Shift: $('kbd[data-k="Shift"]'), P: $('kbd[data-k="P"]') };
+  const held = new Set();
+  const light = () => Object.entries(kbd).forEach(([name, el]) => el.classList.toggle("on", held.has(name)));
+  const toggleMini = () => mini.classList.toggle("away");
+  const flash = async () => {
+    for (const name of ["Alt", "Shift", "P"]) { held.add(name); light(); await sleep(90); }
+    toggleMini();
+    await sleep(220);
+    held.clear();
+    light();
+  };
+  keysButton.addEventListener("click", flash);
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Alt") held.add("Alt");
+    if (event.key === "Shift") held.add("Shift");
+    if (event.code === "KeyP") held.add("P");
+    light();
+    if (event.altKey && event.shiftKey && event.code === "KeyP") { event.preventDefault(); toggleMini(); }
+  });
+  window.addEventListener("keyup", (event) => {
+    if (event.key === "Alt") held.delete("Alt");
+    if (event.key === "Shift") held.delete("Shift");
+    if (event.code === "KeyP") held.delete("P");
+    light();
+  });
+  window.addEventListener("blur", () => { held.clear(); light(); });
+
+  /* Burn: the history goes up in sparks. */
+  const burn = $("#burn");
+  const fire = $(".fire", burn);
+  const again = $(".again", burn);
+  const sparks = (row) => {
+    const r = row.getBoundingClientRect();
+    const b = burn.getBoundingClientRect();
+    for (let k = 0; k < 9; k += 1) {
+      const s = document.createElement("i");
+      s.className = "spark";
+      place(s, r.left - b.left + 76 + Math.random() * Math.max(r.width - 120, 40), r.top - b.top + r.height / 2);
+      burn.append(s);
+      s.animate(
+        [{ transform: "translate(0,0) scale(1)", opacity: 1 }, { transform: `translate(${(Math.random() - 0.5) * 50}px, ${-34 - Math.random() * 56}px) scale(.2)`, opacity: 0 }],
+        { duration: 650 + Math.random() * 550, delay: Math.random() * 140, easing: "cubic-bezier(.2,.7,.2,1)", fill: "both" }
+      ).finished.then(() => s.remove(), () => s.remove());
+    }
+  };
+  fire.addEventListener("click", () => {
+    if (fire.disabled) return;
+    fire.disabled = true;
+    if (reduce) { burn.classList.add("burnt"); again.focus({ preventScroll: true }); return; }
+    burn.classList.add("burning");
+    $$(".hist li", burn).forEach((row, i) => window.setTimeout(() => sparks(row), i * 90 + 120));
+    window.setTimeout(() => { burn.classList.add("burnt"); again.focus({ preventScroll: true }); }, 1200);
+  });
+  again.addEventListener("click", () => {
+    burn.classList.remove("burning", "burnt");
+    fire.disabled = false;
+    fire.focus({ preventScroll: true });
+  });
+
+  /* Secret profile: any four digits open the example. */
+  const pin = $("#pin");
+  const pinDots = $$(".dots4 i", pin);
+  const relock = $(".relock", pin);
+  let code = "";
+  const paintDots = () => pinDots.forEach((dot, i) => dot.classList.toggle("f", i < code.length));
+  const press = (key) => {
+    if (pin.classList.contains("open")) return;
+    if (key === "del") code = code.slice(0, -1);
+    else if (code.length < 4) code += key;
+    paintDots();
+    if (code.length === 4) window.setTimeout(() => { pin.classList.add("open"); relock.focus({ preventScroll: true }); }, 360);
+  };
+  $$(".pad button", pin).forEach((button) => button.addEventListener("click", () => press(button.dataset.k || "")));
+  pin.addEventListener("keydown", (event) => {
+    if (/^[0-9]$/.test(event.key)) { event.preventDefault(); press(event.key); }
+    else if (event.key === "Backspace") { event.preventDefault(); press("del"); }
+  });
+  relock.addEventListener("click", () => {
+    code = "";
+    paintDots();
+    pin.classList.remove("open");
+    $('.pad button[data-k="1"]', pin).focus({ preventScroll: true });
+  });
+
+  /* Download: the visitor's own system first. */
+  const ua = navigator.userAgent;
+  const os = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "ios"
+    : /Android/.test(ua) ? "android"
+    : /Windows/.test(ua) ? "windows"
+    : /Macintosh|Mac OS X/.test(ua) ? "mac"
+    : /Linux/.test(ua) ? "linux" : "";
+  const osName = { windows: "Windows", mac: "Mac", linux: "Linux", android: "Android", ios: "iPhone" };
+  if (os) {
+    const tile = $(`.dl a[data-os="${os}"]`);
+    if (tile) tile.classList.add("yours");
+    const label = $(".cta .btn-primary .lbl");
+    if (label) label.textContent = `Скачать для ${osName[os]}`;
+  }
+})();
+</script>
+</body>
+</html>
